@@ -1,0 +1,117 @@
+body {
+  background-color: #111;
+  color: #eee;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  max-width: 600px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.match-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.scroll-container {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 1em auto;
+  max-width: 100%;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #1e1e1e;
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #222;
+  font-size: 0.9em;
+}
+
+.team-table th,
+.team-table td {
+  padding: 12px;
+  border: 1px solid #444;
+  text-align: center;
+}
+
+.center {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.upload-box {
+  text-align: center;
+}
+
+.batch-gen {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.toggle-btns {
+  display: flex;
+  gap: 1rem;
+}
+
+.main-btn,
+.secondary-btn {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.main-btn:hover,
+.secondary-btn:hover {
+  background-color: #555;
+}
+
+.player-table {
+  width: 100%;
+  margin-top: 2rem;
+  border-collapse: collapse;
+  background-color: #222;
+}
+
+.player-table th,
+.player-table td {
+  border: 1px solid #444;
+  padding: 8px;
+  text-align: center;
+}
+
+.history {
+  margin-top: 2rem;
+}
+.scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
