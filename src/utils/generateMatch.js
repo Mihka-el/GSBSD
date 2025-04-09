@@ -1,134 +1,87 @@
-const isRecentlyPlayed = (player, recentMatches) => {
-  for (let match of recentMatches.slice(-2)) {
-    if (match.includes(player.Name)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const isValidPair = (p1, p2, allowSpecialPatterns = false) => {
-  const gradePair = [p1.Grade, p2.Grade].sort().join("+");
-
-  const validPairs = ["A+A", "B+B", "S+B", "A+C"];
-  const invalidPairs = ["S+A", "S+C"];
-
-  if (allowSpecialPatterns) {
-    return (
-      gradePair === "S+S" ||
-      gradePair === "A+S" ||
-      validPairs.includes(gradePair) ||
-      p1.Grade === p2.Grade
-    );
-  }
-
-  if (invalidPairs.includes(gradePair)) return false;
-  return validPairs.includes(gradePair) || p1.Grade === p2.Grade;
-};
-
-const isMixedGenderValid = (group) => {
-  const genders = group.map((p) => p.Gender);
-  const team1 = genders.slice(0, 2);
-  const team2 = genders.slice(2, 4);
-
-  const isMF = (team) => team.includes("M") && team.includes("F");
-  const isFF = (team) => team.every((g) => g === "F");
-
-  return (isMF(team1) && isMF(team2)) || (isFF(team1) && isFF(team2));
-};
-
-export function generateMatch(players, recentMatches, options = {}) {
+export function generateMatch(players, matchHistory, options = {}) {
   const {
     allowSpecialPatterns = false,
     allowMixedGender = false,
-    advancedOption = false,
   } = options;
 
-  let pool = players;
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
 
-  if (advancedOption) {
-    // Force only S and A players, ignore Active, recent, etc.
-    pool = players.filter((p) => p.Grade === "S" || p.Grade === "A");
-  } else if (!(allowSpecialPatterns || allowMixedGender)) {
-    pool = players.filter(
-      (p) =>
-        (p.Active === true || p.Active === "TRUE") &&
-        !isRecentlyPlayed(p, recentMatches)
-    );
+  const activePlayers = players.filter((p) => p.Active === true || p.Active === "TRUE");
 
-    if (pool.length < 4) {
-      players.forEach((p) => {
-        p.Active = true;
-      });
+  const gradePriority = ["S", "A", "B", "C"];
+  const groupBy = (arr, key) => arr.reduce((acc, obj) => {
+    const val = obj[key];
+    acc[val] = acc[val] || [];
+    acc[val].push(obj);
+    return acc;
+  }, {});
 
-      pool = players.filter(
-        (p) =>
-          (p.Active === true || p.Active === "TRUE") &&
-          !isRecentlyPlayed(p, recentMatches)
-      );
-    }
-  }
+  const getLastMatchPlayers = () => {
+    if (matchHistory.length === 0) return [];
+    const lastMatch = matchHistory[matchHistory.length - 1];
+    return lastMatch || [];
+  };
 
-  const eligible = [...pool].sort(
-    (a, b) =>
-      advancedOption
-        ? 0 // ignore Games Played sorting
-        : parseInt(a["Games Played"]) - parseInt(b["Games Played"])
-  );
+  const lastMatchPlayers = getLastMatchPlayers();
 
-  const validPairs = [];
-  for (let i = 0; i < eligible.length; i++) {
-    for (let j = i + 1; j < eligible.length; j++) {
-      const p1 = eligible[i];
-      const p2 = eligible[j];
+  const isBackToBack = (team) => {
+    return team.some(p => lastMatchPlayers.includes(p.Name));
+  };
 
-      if (p1.Name === p2.Name) continue;
-      if (isValidPair(p1, p2, allowSpecialPatterns || advancedOption)) {
-        validPairs.push([p1, p2]);
+  const allCombos = [];
+
+  for (let i = 0; i < activePlayers.length; i++) {
+    for (let j = i + 1; j < activePlayers.length; j++) {
+      for (let k = 0; k < activePlayers.length; k++) {
+        for (let l = k + 1; l < activePlayers.length; l++) {
+          const team1 = [activePlayers[i], activePlayers[j]];
+          const team2 = [activePlayers[k], activePlayers[l]];
+
+          const names = new Set([...team1.map(p => p.Name), ...team2.map(p => p.Name)]);
+          if (names.size < 4) continue;
+
+          const team = [...team1, ...team2];
+
+          if (allowSpecialPatterns) {
+            const allS = team.every(p => p.Grade === "S");
+            if (!allS) continue;
+          }
+
+          if (allowMixedGender) {
+            const team1M = team1.filter(p => p.Gender === "M").length;
+            const team1F = team1.filter(p => p.Gender === "F").length;
+            const team2M = team2.filter(p => p.Gender === "M").length;
+            const team2F = team2.filter(p => p.Gender === "F").length;
+
+            if (!(team1M === 1 && team1F === 1 && team2M === 1 && team2F === 1)) {
+              continue;
+            }
+          }
+
+          const combo = { team1, team2, team };
+
+          // B2B check
+          if (isBackToBack(team)) {
+            combo.skipReason = "B2B";
+          }
+
+          allCombos.push(combo);
+        }
       }
     }
   }
 
-  // Shuffle all valid pairs to randomize
-  for (let i = validPairs.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [validPairs[i], validPairs[j]] = [validPairs[j], validPairs[i]];
+  if (allCombos.length === 0) return null;
+
+  // Filter non-B2B options first
+  const nonB2BCombos = allCombos.filter(c => !c.skipReason);
+  const chosen = nonB2BCombos.length > 0
+    ? nonB2BCombos[Math.floor(Math.random() * nonB2BCombos.length)]
+    : allCombos[Math.floor(Math.random() * allCombos.length)];
+
+  if (chosen.skipReason === "B2B") {
+    console.log("⚠️ No non-B2B matches available. Using a B2B match as fallback.");
   }
 
-  // 1?? Try prioritize S+S vs S+S first
-  const sGradePairs = validPairs.filter(
-    ([a, b]) => a.Grade === "S" && b.Grade === "S"
-  );
-
-  for (let i = 0; i < sGradePairs.length; i++) {
-    for (let j = 0; j < sGradePairs.length; j++) {
-      if (i === j) continue;
-      const [p1a, p1b] = sGradePairs[i];
-      const [p2a, p2b] = sGradePairs[j];
-
-      const names = [p1a.Name, p1b.Name, p2a.Name, p2b.Name];
-      if (new Set(names).size === 4) {
-        return [p1a, p1b, p2a, p2b];
-      }
-    }
-  }
-
-  // 2?? If not enough S+S, try all other valid randomized combos
-  for (let i = 0; i < validPairs.length; i++) {
-    for (let j = 0; j < validPairs.length; j++) {
-      if (i === j) continue;
-      const [p1a, p1b] = validPairs[i];
-      const [p2a, p2b] = validPairs[j];
-
-      const names = [p1a.Name, p1b.Name, p2a.Name, p2b.Name];
-      if (new Set(names).size !== 4) continue;
-
-      const match = [p1a, p1b, p2a, p2b];
-      if (allowMixedGender && !isMixedGenderValid(match)) continue;
-
-      return match;
-    }
-  }
-
-  return null;
+  return chosen.team;
 }

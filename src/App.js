@@ -97,11 +97,17 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className="app-title">🎮 GSB Match Generator</h1>
+<h1 className="app-title">
+  🎮 GSBSD Match Generator
+  <span style={{ fontSize: "0.6em", marginLeft: "1rem", color: "#888" }}>
+    v0.0.09
+  </span>
+</h1>
+
 
       {/* Match Section */}
       <div className="match-section">
-        <h2>🎯 Match History</h2>
+
 
         <button className="secondary-btn" onClick={() => setShowUpload(!showUpload)}>
           {showUpload ? "Hide CSV Upload" : "📂 Upload CSV"}
@@ -138,7 +144,7 @@ function App() {
             </label>
           </div>
         )}
-
+        <h2>🎯 Match History</h2>
         <div className="scroll-container">
           <table className="team-table">
             <thead>
