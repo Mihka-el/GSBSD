@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 import "./App.css";
-import { generateMatch } from "./utils/generateMatch";
+
+// Custom Components
 import ManualGameAdd from "./components/ManualGameAdd";
+import MatchTable from "./components/MatchTable";
+import PlayerList from "./components/PlayerList";
+import { generateMatch } from "./utils/generateMatch";
 
 function App() {
+  // 🔧 App State
   const [players, setPlayers] = useState([]);
   const [generatedMatches, setGeneratedMatches] = useState([]);
   const [showPlayerList, setShowPlayerList] = useState(false);
@@ -13,8 +18,9 @@ function App() {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
   const [allowMixedGender, setAllowMixedGender] = useState(false);
-  const DEMO_MODE = false;
+  const DEMO_MODE = true;
 
+  // 🎨 Grade color for demo mode
   const getGradeColor = (grade) => {
     switch (grade) {
       case "S": return "gold";
@@ -25,6 +31,7 @@ function App() {
     }
   };
 
+  // 🏷️ Format player display
   const formatPlayer = (player) => {
     if (!DEMO_MODE) return player.Name;
     return (
@@ -34,6 +41,7 @@ function App() {
     );
   };
 
+  // 📂 Upload CSV and parse players
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     Papa.parse(file, {
@@ -52,6 +60,7 @@ function App() {
     });
   };
 
+  // 🧠 Match generation logic
   const generateOneMatch = () => {
     let currentPlayers = [...players];
     let match = generateMatch(currentPlayers, generatedMatches, {
@@ -85,6 +94,7 @@ function App() {
     setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
   };
 
+  // 🔄 Reset all player stats and match history
   const resetPlayers = () => {
     const reset = players.map((p) => ({
       ...p,
@@ -97,21 +107,20 @@ function App() {
 
   return (
     <div className="App">
-<h1 className="app-title">
-  🎮 GSBSD Match Generator
-  <span style={{ fontSize: "0.6em", marginLeft: "1rem", color: "#888" }}>
-    v0.0.09
-  </span>
-</h1>
+      {/* 🧱 Title */}
+      <h1 className="app-title">
+        🎮 GSBSD Match Generator
+        <span style={{ fontSize: "0.6em", marginLeft: "1rem", color: "#888" }}>
+          v0.0.09
+        </span>
+      </h1>
 
-
-      {/* Match Section */}
+      {/* 🎮 Main Controls */}
       <div className="match-section">
-
-
         <button className="secondary-btn" onClick={() => setShowUpload(!showUpload)}>
           {showUpload ? "Hide CSV Upload" : "📂 Upload CSV"}
         </button>
+
         {showUpload && (
           <div className="upload-box">
             <input type="file" accept=".csv" onChange={handleFileUpload} />
@@ -144,30 +153,13 @@ function App() {
             </label>
           </div>
         )}
+
+        {/* 📝 Match History Table */}
         <h2>🎯 Match History</h2>
-        <div className="scroll-container">
-          <table className="team-table">
-            <thead>
-              <tr><th>Match #</th><th>Team 1</th><th>Team 2</th></tr>
-            </thead>
-            <tbody>
-              {generatedMatches.map((match, index) => {
-                const team1 = match.slice(0, 2).join(", ");
-                const team2 = match.slice(2, 4).join(", ");
-                return (
-                  <tr key={index}>
-                    <td>{`Match ${index + 1}`}</td>
-                    <td>{team1}</td>
-                    <td>{team2}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <MatchTable generatedMatches={generatedMatches} />
       </div>
 
-      {/* Controls */}
+      {/* 🔘 Footer Controls */}
       <div className="controls">
         <div className="toggle-btns">
           <button className="secondary-btn" onClick={() => setShowHistory(!showHistory)}>
@@ -182,7 +174,7 @@ function App() {
         </div>
       </div>
 
-      {/* Match History Detail */}
+      {/* 🧾 Match History Detail */}
       {showHistory && (
         <div className="history">
           <h3>📜 Match History</h3>
@@ -202,37 +194,14 @@ function App() {
         </div>
       )}
 
-      {/* Player List */}
+      {/* 👥 Player List */}
       {showPlayerList && (
-        <div className="preview">
-          <h2>👥 Player List</h2>
-
-          <h4 style={{ marginTop: "1rem" }}>➕ Manually Add Game</h4>
-          <ManualGameAdd
-  players={players}
-  setPlayers={setPlayers}
-  setGeneratedMatches={setGeneratedMatches}
-/>
-
-
-          <table className="player-table">
-            <thead>
-              <tr>
-                {["Name", "Grade", "Gender", "Games", "Active"].map((key) => (
-                  <th key={key}>{key}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {players.map((player, index) => (
-                <tr key={index}>
-                  {[formatPlayer(player), player.Grade, player.Gender, player["Games Played"], player.Active]
-                    .map((val, i) => <td key={i}>{val}</td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PlayerList
+          players={players}
+          setPlayers={setPlayers}
+          setGeneratedMatches={setGeneratedMatches}
+          formatPlayer={formatPlayer}
+        />
       )}
     </div>
   );
