@@ -9,7 +9,6 @@ import PlayerList from "./components/PlayerList";
 import { generateMatch } from "./utils/generateMatch";
 
 function App() {
-  // 🔧 App State
   const [players, setPlayers] = useState([]);
   const [generatedMatches, setGeneratedMatches] = useState([]);
   const [showPlayerList, setShowPlayerList] = useState(false);
@@ -18,9 +17,9 @@ function App() {
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
   const [allowMixedGender, setAllowMixedGender] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
   const DEMO_MODE = true;
 
-  // 🎨 Grade color for demo mode
   const getGradeColor = (grade) => {
     switch (grade) {
       case "S": return "gold";
@@ -31,7 +30,6 @@ function App() {
     }
   };
 
-  // 🏷️ Format player display
   const formatPlayer = (player) => {
     if (!DEMO_MODE) return player.Name;
     return (
@@ -41,7 +39,6 @@ function App() {
     );
   };
 
-  // 📂 Upload CSV and parse players
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     Papa.parse(file, {
@@ -60,7 +57,6 @@ function App() {
     });
   };
 
-  // 🧠 Match generation logic
   const generateOneMatch = () => {
     let currentPlayers = [...players];
     let match = generateMatch(currentPlayers, generatedMatches, {
@@ -94,7 +90,6 @@ function App() {
     setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
   };
 
-  // 🔄 Reset all player stats and match history
   const resetPlayers = () => {
     const reset = players.map((p) => ({
       ...p,
@@ -105,17 +100,21 @@ function App() {
     setGeneratedMatches([]);
   };
 
+  const handleDeleteMatch = (index) => {
+    const updatedMatches = [...generatedMatches];
+    updatedMatches.splice(index, 1);
+    setGeneratedMatches(updatedMatches);
+  };
+
   return (
     <div className="App">
-      {/* 🧱 Title */}
       <h1 className="app-title">
         🎮 GSBSD Match Generator
         <span style={{ fontSize: "0.6em", marginLeft: "1rem", color: "#888" }}>
-          v0.0.09
+          v0.0.10
         </span>
       </h1>
 
-      {/* 🎮 Main Controls */}
       <div className="match-section">
         <button className="secondary-btn" onClick={() => setShowUpload(!showUpload)}>
           {showUpload ? "Hide CSV Upload" : "📂 Upload CSV"}
@@ -127,12 +126,14 @@ function App() {
           </div>
         )}
 
-        <button className="main-btn" onClick={generateOneMatch}>Generate 1 Match</button>
+        <button className="main-btn" onClick={generateOneMatch}>Match</button>
 
         <button className="secondary-btn" onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
-          {showAdvancedOptions ? "Hide Advanced Options" : "⚙️ Advanced Options"}
+          {showAdvancedOptions ? "⚙️" : "⚙️"}
         </button>
-
+        <button className="secondary-btn" onClick={() => setDeleteMode(!deleteMode)}>
+          {deleteMode ? "🔒" : "🔓"}
+        </button>
         {showAdvancedOptions && (
           <div className="advanced-options">
             <label>
@@ -154,12 +155,15 @@ function App() {
           </div>
         )}
 
-        {/* 📝 Match History Table */}
         <h2>🎯 Match History</h2>
-        <MatchTable generatedMatches={generatedMatches} />
+
+        <MatchTable
+          generatedMatches={generatedMatches}
+          onDelete={handleDeleteMatch}
+          deleteMode={deleteMode}
+        />
       </div>
 
-      {/* 🔘 Footer Controls */}
       <div className="controls">
         <div className="toggle-btns">
           <button className="secondary-btn" onClick={() => setShowHistory(!showHistory)}>
@@ -174,7 +178,6 @@ function App() {
         </div>
       </div>
 
-      {/* 🧾 Match History Detail */}
       {showHistory && (
         <div className="history">
           <h3>📜 Match History</h3>
@@ -194,7 +197,6 @@ function App() {
         </div>
       )}
 
-      {/* 👥 Player List */}
       {showPlayerList && (
         <PlayerList
           players={players}
