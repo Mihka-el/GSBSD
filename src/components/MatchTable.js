@@ -1,12 +1,17 @@
 // components/MatchTable.js
 import React from "react";
 
-const MatchTable = ({ generatedMatches }) => {
+const MatchTable = ({ generatedMatches, onDelete, deleteMode }) => {
   return (
     <div className="scroll-container">
       <table className="team-table">
         <thead>
-          <tr><th>Match #</th><th>Team 1</th><th>Team 2</th></tr>
+          <tr>
+            <th>Match #</th>
+            <th>Team 1</th>
+            <th>Team 2</th>
+            {deleteMode && <th>Delete</th>}
+          </tr>
         </thead>
         <tbody>
           {generatedMatches.map((match, index) => {
@@ -17,6 +22,11 @@ const MatchTable = ({ generatedMatches }) => {
                 <td>{`Match ${index + 1}`}</td>
                 <td>{team1}</td>
                 <td>{team2}</td>
+                {deleteMode && (
+                  <td>
+                    <button onClick={() => onDelete(index)}>❌</button>
+                  </td>
+                )}
               </tr>
             );
           })}
