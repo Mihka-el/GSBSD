@@ -1,4 +1,3 @@
-// 🎮 App.js (Revamped with Card Layout)
 import React, { useState } from "react";
 import Papa from "papaparse";
 import "./App.css";
@@ -116,25 +115,30 @@ function App() {
     <div className="app">
       <header className="header">
         <h1>
-          🎮 GSBSD Match Generator
+          GSBSD Generator
           <span
-            style={{ fontSize: "0.6em", marginLeft: "1rem", color: "#888" }}
+            style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}
           >
             v0.1.00
           </span>
         </h1>
-        <div className="menu">
-          <button onClick={() => setShowUpload(!showUpload)}>
-            {showUpload ? "Hide Upload" : "📂 Upload CSV"}
-          </button>
-          <button onClick={generateOneMatch}>➕ Match</button>
-          <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
-            ⚙️
-          </button>
-          <button onClick={() => setDeleteMode(!deleteMode)}>
-            {deleteMode ? "🔒" : "🗑️"}
-          </button>
-        </div>
+		<br />
+
+		<div className="button-container">
+       <div className="menu">
+  <button
+    className="upload-button"
+    onClick={() => setShowUpload(!showUpload)}
+  >
+    {showUpload ? "Hide Upload" : "📂"}
+  </button>
+  <button onClick={generateOneMatch}>➕ Match</button>
+  <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>⚙️</button>
+  <button onClick={() => setDeleteMode(!deleteMode)}>
+    {deleteMode ? "🔒" : "🗑️"}
+  </button>
+</div>
+</div>
       </header>
 
       {showUpload && (
