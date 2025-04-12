@@ -16,23 +16,40 @@ body {
   text-align: center;
   margin-bottom: 20px;
 }
+.header h1 {
+  font-size: 1.7rem; /* Adjust the title size as needed */
+  font-weight: bold; /* Make sure the title stands out */
+  margin-bottom: 20px; /* Optional, to add space below the title */
+}
 
+.header span {
+  font-size: 0.6em; /* Keep the version smaller */
+  margin-left: 1rem;
+  color: #888;
+}
 .menu {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 10px;
+  gap: 20px; /* Space between buttons */
+  justify-content: center; /* Ensure buttons are horizontally centered */
+  flex-wrap: nowrap; /* Ensure buttons do not wrap to the next line */
 }
 
 button {
   background-color: #1e1e1e;
   color: white;
   border: 1px solid #333;
-  padding: 8px 14px;
+  padding: 4px 8px; /* Reduce padding to fit the icon size */
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  min-width: 40px; /* Set a smaller width */
+  height: 40px; /* Set a height that fits the icon size */
+  font-size: 18px; /* Reduce font size to match the icon size */
+  line-height: 0; /* Ensure no extra line height */
 }
 
 button:hover {
@@ -145,25 +162,22 @@ button:hover {
 
 @media (max-width: 600px) {
   .menu {
+    flex-direction: row; /* Ensure buttons are always horizontal */
+    align-items: center; /* Ensure buttons align properly vertically */
+  }
+
+  .menu button {
+    min-width: 40px; /* Smaller minimum width */
+    width: auto; /* Buttons will not expand to 100% width on small screens */
+  }
+
+  .upload-box {
+    margin-top: 20px;
+  }s
+
+  .actions {
     flex-direction: column;
+    gap: 15px;
     align-items: center;
   }
-  .match-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-input[type="text"],
-input[type="number"] {
-  background-color: #1e1e1e;
-  color: #ffffff; /* or #f0f0f0 */
-  border: 1px solid #444;
-  padding: 6px 10px;
-  border-radius: 6px;
-  outline: none;
-}
-
-input[type="text"]::placeholder,
-input[type="number"]::placeholder {
-  color: #888;
 }
