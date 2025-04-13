@@ -181,3 +181,21 @@ button:hover {
     align-items: center;
   }
 }
+
+
+input,
+select,
+textarea {
+  background-color: #1e1e1e; /* dark background to match theme */
+  color: #f0f0f0; /* light text for contrast */
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #555;
+}
