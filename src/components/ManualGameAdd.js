@@ -47,7 +47,7 @@ export default function ManualGameAdd({ players, setPlayers, setGeneratedMatches
         onChange={(e) => setInput(e.target.value)}
         style={{ padding: "5px", marginRight: "10px", borderRadius: "5px" }}
       />
-      <button type="submit" style={{ padding: "5px 10px" }}>➕ Add Manual Match</button>
+      <button type="submit" style={{ padding: "5px 10px" }}>➕ Add Match</button>
     </form>
   );
 }

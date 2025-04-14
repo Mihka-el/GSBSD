@@ -1,44 +1,48 @@
-/* 🌒 App.css – includes scrollable player list fix */
+/* 🌒 App.css – Responsive Dark Theme */
 body {
   margin: 0;
   background-color: #121212;
   color: #f0f0f0;
   font-family: "Segoe UI", sans-serif;
+  overflow-x: hidden;
 }
 
 .app {
   padding: 20px;
   max-width: 1000px;
   margin: auto;
+  box-sizing: border-box;
 }
 
 .header {
   text-align: center;
   margin-bottom: 20px;
 }
+
 .header h1 {
-  font-size: 1.7rem; /* Adjust the title size as needed */
-  font-weight: bold; /* Make sure the title stands out */
-  margin-bottom: 20px; /* Optional, to add space below the title */
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .header span {
-  font-size: 0.6em; /* Keep the version smaller */
+  font-size: 0.6em;
   margin-left: 1rem;
   color: #888;
 }
+
 .menu {
   display: flex;
-  gap: 20px; /* Space between buttons */
-  justify-content: center; /* Ensure buttons are horizontally centered */
-  flex-wrap: nowrap; /* Ensure buttons do not wrap to the next line */
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 button {
   background-color: #1e1e1e;
   color: white;
   border: 1px solid #333;
-  padding: 4px 8px; /* Reduce padding to fit the icon size */
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -46,10 +50,10 @@ button {
   justify-content: center;
   align-items: center;
   width: auto;
-  min-width: 40px; /* Set a smaller width */
-  height: 40px; /* Set a height that fits the icon size */
-  font-size: 18px; /* Reduce font size to match the icon size */
-  line-height: 0; /* Ensure no extra line height */
+  min-width: 40px;
+  height: 40px;
+  font-size: 18px;
+  line-height: 0;
 }
 
 button:hover {
@@ -61,7 +65,19 @@ button:hover {
   text-align: center;
 }
 
-.advanced-options {
+.advanced-options,
+.player-addition {
+  margin: 1rem auto;
+  padding: 10px;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.manual-match-section {
   margin: 1rem auto;
   padding: 10px;
   background-color: #1e1e1e;
@@ -160,37 +176,16 @@ button:hover {
   background-color: transparent;
 }
 
-@media (max-width: 600px) {
-  .menu {
-    flex-direction: row; /* Ensure buttons are always horizontal */
-    align-items: center; /* Ensure buttons align properly vertically */
-  }
-
-  .menu button {
-    min-width: 40px; /* Smaller minimum width */
-    width: auto; /* Buttons will not expand to 100% width on small screens */
-  }
-
-  .upload-box {
-    margin-top: 20px;
-  }s
-
-  .actions {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-}
-
-
 input,
 select,
 textarea {
-  background-color: #1e1e1e; /* dark background to match theme */
-  color: #f0f0f0; /* light text for contrast */
+  background-color: #1e1e1e;
+  color: #f0f0f0;
   border: 1px solid #333;
   padding: 6px 10px;
   border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus,
@@ -198,4 +193,92 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: #555;
+}
+
+/* Ensures consistency for specific side-by-side inputs */
+.input-fixed {
+  width: 250px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  box-sizing: border-box;
+}
+
+/* Mobile / Small screen tweaks */
+@media (max-width: 600px) {
+  .app {
+    padding: 10px;
+  }
+
+  .menu {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .menu button {
+    flex: 1 0 auto;
+    min-width: 40px;
+    font-size: 16px;
+    height: 36px;
+    margin-bottom: 5px;
+  }
+
+  .match-grid {
+    max-height: 300px;
+  }
+
+  .upload-box {
+    margin-top: 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  body {
+    font-size: 15px;
+  }
+
+  button {
+    font-size: 16px;
+    height: 36px;
+  }
+
+  .player-addition input,
+  .player-addition select,
+  .player-addition button,
+  .advanced-options input,
+  .advanced-options select,
+  .advanced-options button {
+    width: 100%;
+  }
+}
+
+.red-box {
+  width: 200px;
+  height: 200px;
+  background-color: red;
+}
+.manual-match-section input,
+.manual-match-section select,
+.manual-match-section button {
+  width: 100%; /* Ensure all elements take the full width */
+  box-sizing: border-box;
+}
+
+.manual-match-section input {
+  margin-bottom: 10px; /* Adjust space between input and button */
+}
+
+.manual-match-section button {
+  margin-top: 10px; /* Optional: Adjust top margin for the button */
+  padding: 10px 0;  /* Optional: Adjust padding inside the button */
+  color: white;
+  border-radius: 4px;
 }
