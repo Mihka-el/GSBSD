@@ -39,15 +39,31 @@ export default function ManualGameAdd({ players, setPlayers, setGeneratedMatches
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
+    <form onSubmit={handleSubmit} style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
       <input
         type="text"
         placeholder="e.g. mike topan keke edith"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        style={{ padding: "5px", marginRight: "10px", borderRadius: "5px" }}
+        style={{ 
+          padding: "8px", 
+          borderRadius: "5px", 
+          width: "calc(100% - 120px)", /* Adjust width to fit input and button */
+          minWidth: "145px", /* Ensure minimum width */
+          boxSizing: "border-box" /* Prevent input from overflowing */
+        }}
       />
-      <button type="submit" style={{ padding: "5px 10px" }}>➕ Add Manual Match</button>
+      <button type="submit" style={{ 
+        padding: "8px 16px", 
+        borderRadius: "5px", 
+        backgroundColor: "#1e1e1e", 
+        color: "white", 
+        border: "none", 
+        cursor: "pointer",
+        minWidth: "50px" /* Make sure button has a minimum width */
+      }}>
+        ➕ Match
+      </button>
     </form>
   );
 }

@@ -16,29 +16,37 @@ body {
   text-align: center;
   margin-bottom: 20px;
 }
+
 .header h1 {
-  font-size: 1.7rem; /* Adjust the title size as needed */
-  font-weight: bold; /* Make sure the title stands out */
-  margin-bottom: 20px; /* Optional, to add space below the title */
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .header span {
-  font-size: 0.6em; /* Keep the version smaller */
+  font-size: 0.6em;
   margin-left: 1rem;
   color: #888;
 }
+
 .menu {
   display: flex;
-  gap: 20px; /* Space between buttons */
-  justify-content: center; /* Ensure buttons are horizontally centered */
-  flex-wrap: nowrap; /* Ensure buttons do not wrap to the next line */
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  min-width: max-content;
+}
+
+.button-container {
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
 button {
   background-color: #1e1e1e;
   color: white;
   border: 1px solid #333;
-  padding: 4px 8px; /* Reduce padding to fit the icon size */
+  padding: 4px 8px;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -46,10 +54,10 @@ button {
   justify-content: center;
   align-items: center;
   width: auto;
-  min-width: 40px; /* Set a smaller width */
-  height: 40px; /* Set a height that fits the icon size */
-  font-size: 18px; /* Reduce font size to match the icon size */
-  line-height: 0; /* Ensure no extra line height */
+  min-width: 40px;
+  height: 40px;
+  font-size: 18px;
+  line-height: 0;
 }
 
 button:hover {
@@ -160,34 +168,34 @@ button:hover {
   background-color: transparent;
 }
 
-@media (max-width: 600px) {
-  .menu {
-    flex-direction: row; /* Ensure buttons are always horizontal */
-    align-items: center; /* Ensure buttons align properly vertically */
-  }
-
-  .menu button {
-    min-width: 40px; /* Smaller minimum width */
-    width: auto; /* Buttons will not expand to 100% width on small screens */
-  }
-
-  .upload-box {
-    margin-top: 20px;
-  }s
-
-  .actions {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
+/* ✅ Party Keras & Party Mix horizontal fix */
+.party-keras-checkboxes-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
+.party-keras-checkboxes-row label,
+.party-keras-checkboxes-row > div {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+  gap: 6px;
+  font-size: 14px;
+}
 
+/* Form and input styling */
 input,
 select,
 textarea {
-  background-color: #1e1e1e; /* dark background to match theme */
-  color: #f0f0f0; /* light text for contrast */
+  background-color: #1e1e1e;
+  color: #f0f0f0;
   border: 1px solid #333;
   padding: 6px 10px;
   border-radius: 4px;
@@ -198,4 +206,83 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: #555;
+}
+
+/* 🔁 Responsive Tweaks */
+@media (max-width: 768px) {
+  .manual-match-section,
+  .player-addition {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+  }
+
+  .manual-match-section h3,
+  .player-addition h3 {
+    text-align: center;
+  }
+
+  .manual-match-section input,
+  .player-addition input,
+  .manual-match-section select,
+  .player-addition select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .manual-match-section button,
+  .player-addition button {
+    width: 100%;
+  }
+
+  .match-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .match-card {
+    padding: 12px;
+  }
+
+  .match-header {
+    font-size: 0.9rem;
+  }
+
+  .app {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+  }
+
+  .menu {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .upload-box {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .match-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .menu button {
+    font-size: 16px;
+    height: 36px;
+    padding: 4px 6px;
+  }
+
+  .header h1 {
+    font-size: 1.1rem;
+  }
 }

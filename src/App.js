@@ -3,16 +3,22 @@ import Papa from "papaparse";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import { generateMatch } from "./utils/generateMatch";
+import CSVUploader from "./components/CSVUploader";
+import ManualGameAdd from "./components/ManualGameAdd"; // ✅ import manual add
 
 function App() {
   const [players, setPlayers] = useState([]);
   const [generatedMatches, setGeneratedMatches] = useState([]);
   const [showPlayerList, setShowPlayerList] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showManualAdd, setShowManualAdd] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
   const [allowMixedGender, setAllowMixedGender] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerGrade, setNewPlayerGrade] = useState("S");
+  const [newPlayerGender, setNewPlayerGender] = useState("M"); // Updated gender field
   const DEMO_MODE = false;
 
   const getGradeColor = (grade) => {
@@ -38,62 +44,49 @@ function App() {
     );
   };
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const cleaned = results.data.map((p, i) => ({
-          Name: p.Name?.trim() || `Player ${i + 1}`,
-          Grade: p.Grade?.trim().toUpperCase() || "C",
-          Gender: p.Gender?.trim().toUpperCase() || "M",
-          "Games Played": parseInt(p["Games Played"] || "0", 10),
-          Active: p.Active === "TRUE" || p.Active === true,
-        }));
-        setPlayers(cleaned);
-      },
-    });
-  };
+const generateOneMatch = () => {
+  let currentPlayers = [...players];
 
-  const generateOneMatch = () => {
-    let currentPlayers = [...players];
-    let match = generateMatch(currentPlayers, generatedMatches, {
-      allowSpecialPatterns,
-      allowMixedGender,
-    });
+  let match = generateMatch(currentPlayers, generatedMatches, {
+    allowSpecialPatterns,
+    allowMixedGender,
+  });
 
-    if (!match || match.length !== 4) {
-      const allInactive = currentPlayers.every(
-        (p) => p.Active === false || p.Active === "FALSE"
-      );
-      if (allInactive) {
-        currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
-        match = generateMatch(currentPlayers, generatedMatches, {
-          allowSpecialPatterns,
-          allowMixedGender,
-        });
-      }
+  if (!match || match.length !== 4) {
+    const activeCount = currentPlayers.filter(
+      (p) => p.Active === true || p.Active === "TRUE"
+    ).length;
 
-      if (!match || match.length !== 4) {
-        alert("No valid match can be generated.");
-        return;
-      }
+    if (activeCount < 4) {
+      console.log("🔄 Not enough active players. Resetting all to active.");
+      currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
+
+      match = generateMatch(currentPlayers, generatedMatches, {
+        allowSpecialPatterns,
+        allowMixedGender,
+      });
     }
 
-    const updatedPlayers = currentPlayers.map((p) =>
-      match.find((m) => m.Name === p.Name)
-        ? {
-            ...p,
-            Active: false,
-            "Games Played": parseInt(p["Games Played"]) + 1,
-          }
-        : p
-    );
+    if (!match || match.length !== 4) {
+      alert("❌ No valid match can be generated.");
+      return;
+    }
+  }
 
-    setPlayers(updatedPlayers);
-    setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
-  };
+  const updatedPlayers = currentPlayers.map((p) =>
+    match.find((m) => m.Name === p.Name)
+      ? {
+          ...p,
+          Active: false,
+          "Games Played": parseInt(p["Games Played"]) + 1,
+        }
+      : p
+  );
+
+  setPlayers(updatedPlayers);
+  setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
+};
+
 
   const resetPlayers = () => {
     const reset = players.map((p) => ({
@@ -111,6 +104,26 @@ function App() {
     setGeneratedMatches(updated);
   };
 
+  const handleAddPlayer = () => {
+    if (newPlayerName.trim() === "") {
+      alert("Player name is required");
+      return;
+    }
+
+    const newPlayer = {
+      Name: newPlayerName.trim(),
+      Grade: newPlayerGrade,
+      Gender: newPlayerGender, // Add gender here
+      Active: true,
+      "Games Played": 0,
+    };
+
+    setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
+    setNewPlayerName("");
+    setNewPlayerGrade("S"); // Reset grade to S
+    setNewPlayerGender("M"); // Reset gender to M (Male)
+  };
+
   return (
     <div className="app">
       <header className="header">
@@ -119,54 +132,136 @@ function App() {
           <span
             style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}
           >
-            v0.1.00
+            v0.2.00
           </span>
         </h1>
-		<br />
-
-		<div className="button-container">
-       <div className="menu">
-  <button
-    className="upload-button"
-    onClick={() => setShowUpload(!showUpload)}
-  >
-    {showUpload ? "Hide Upload" : "📂"}
-  </button>
-  <button onClick={generateOneMatch}>➕ Match</button>
-  <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>⚙️</button>
-  <button onClick={() => setDeleteMode(!deleteMode)}>
-    {deleteMode ? "🔒" : "🗑️"}
-  </button>
-</div>
-</div>
+        <br />
+        <div className="button-container">
+          <div className="menu">
+            <button
+              className="upload-button"
+              onClick={() => setShowUpload(!showUpload)}
+            >
+              {showUpload ? "Hide Upload" : "📂"}
+            </button>
+            <button onClick={generateOneMatch}>➕ Match</button>
+            <button onClick={() => setShowManualAdd(!showManualAdd)}>
+              {showManualAdd ? "Hide Manual" : "➕ Manual"}
+            </button>
+            <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+              ⚙️
+            </button>
+            <button onClick={() => setDeleteMode(!deleteMode)}>
+              {deleteMode ? "🔒" : "🗑️"}
+            </button>
+          </div>
+        </div>
       </header>
 
       {showUpload && (
         <div className="upload-box">
-          <input type="file" accept=".csv" onChange={handleFileUpload} />
+          <CSVUploader onDataLoaded={setPlayers} players={players} />
         </div>
       )}
 
-      {showAdvancedOptions && (
-        <div className="advanced-options">
-          <label>
-            <input
-              type="checkbox"
-              checked={allowSpecialPatterns}
-              onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
-            />
-            Party Keras
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={allowMixedGender}
-              onChange={(e) => setAllowMixedGender(e.target.checked)}
-            />
-            Party Mix
-          </label>
-        </div>
-      )}
+
+{showManualAdd && (
+  <div style={{ padding: "10px" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: "20px",
+        alignItems: "stretch",
+      }}
+    >
+      {/* Manual Match Box */}
+      <div
+        className="manual-match-section"
+        style={{
+          flex: 1,
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          boxSizing: "border-box",
+        }}
+      >
+        <h3>Add New Match</h3>
+        <ManualGameAdd
+          players={players}
+          setPlayers={setPlayers}
+          setGeneratedMatches={setGeneratedMatches}
+        />
+      </div>
+
+      {/* Add New Player Box */}
+      <div
+        className="player-addition"
+        style={{
+          flex: 1,
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          boxSizing: "border-box",
+        }}
+      >
+        <h3>Add New Player</h3>
+        <input
+          type="text"
+          placeholder="Player Name"
+          value={newPlayerName}
+          onChange={(e) => setNewPlayerName(e.target.value)}
+        />
+        <select
+          value={newPlayerGrade}
+          onChange={(e) => setNewPlayerGrade(e.target.value)}
+        >
+          <option value="S">S</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+        </select>
+        <select
+          value={newPlayerGender}
+          onChange={(e) => setNewPlayerGender(e.target.value)}
+        >
+          <option value="M">M</option>
+          <option value="F">F</option>
+        </select>
+        <button onClick={handleAddPlayer}>➕ Player</button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+{showAdvancedOptions && (
+  <div className="advanced-options" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <input
+        type="checkbox"
+        checked={allowSpecialPatterns}
+        onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
+        style={{ marginRight: "10px" }} // Space between checkbox and label
+      />
+      <span>Party Keras</span>
+    </div>
+    
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <input
+        type="checkbox"
+        checked={allowMixedGender}
+        onChange={(e) => setAllowMixedGender(e.target.checked)}
+        style={{ marginRight: "10px" }} // Space between checkbox and label
+      />
+      <span>Party Mix</span>
+    </div>
+  </div>
+)}
+
+
 
       <div className="match-grid">
         {generatedMatches.map((match, index) => (
