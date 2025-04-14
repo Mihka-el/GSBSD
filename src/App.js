@@ -3,17 +3,22 @@ import Papa from "papaparse";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import { generateMatch } from "./utils/generateMatch";
-import CSVUploader from "./components/CSVUploader"; // Make sure this path matches your file structure
+import CSVUploader from "./components/CSVUploader";
+import ManualGameAdd from "./components/ManualGameAdd"; // ✅ import manual add
 
 function App() {
   const [players, setPlayers] = useState([]);
   const [generatedMatches, setGeneratedMatches] = useState([]);
   const [showPlayerList, setShowPlayerList] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showManualAdd, setShowManualAdd] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
   const [allowMixedGender, setAllowMixedGender] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerGrade, setNewPlayerGrade] = useState("S");
+  const [newPlayerGender, setNewPlayerGender] = useState("M"); // Updated gender field
   const DEMO_MODE = false;
 
   const getGradeColor = (grade) => {
@@ -94,6 +99,26 @@ function App() {
     setGeneratedMatches(updated);
   };
 
+  const handleAddPlayer = () => {
+    if (newPlayerName.trim() === "") {
+      alert("Player name is required");
+      return;
+    }
+
+    const newPlayer = {
+      Name: newPlayerName.trim(),
+      Grade: newPlayerGrade,
+      Gender: newPlayerGender, // Add gender here
+      Active: true,
+      "Games Played": 0,
+    };
+
+    setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
+    setNewPlayerName("");
+    setNewPlayerGrade("S"); // Reset grade to S
+    setNewPlayerGender("M"); // Reset gender to M (Male)
+  };
+
   return (
     <div className="app">
       <header className="header">
@@ -115,7 +140,12 @@ function App() {
               {showUpload ? "Hide Upload" : "📂"}
             </button>
             <button onClick={generateOneMatch}>➕ Match</button>
-            <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>⚙️</button>
+            <button onClick={() => setShowManualAdd(!showManualAdd)}>
+              {showManualAdd ? "Hide Manual" : "➕ Manual"}
+            </button>
+            <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+              ⚙️
+            </button>
             <button onClick={() => setDeleteMode(!deleteMode)}>
               {deleteMode ? "🔒" : "🗑️"}
             </button>
@@ -126,6 +156,42 @@ function App() {
       {showUpload && (
         <div className="upload-box">
           <CSVUploader onDataLoaded={setPlayers} players={players} />
+        </div>
+      )}
+
+      {showManualAdd && (
+        <div style={{ padding: "10px" }}>
+          <ManualGameAdd
+            players={players}
+            setPlayers={setPlayers}
+            setGeneratedMatches={setGeneratedMatches}
+          />
+          <div className="player-addition">
+            <h3>Add New Player</h3>
+            <input
+              type="text"
+              placeholder="Player Name"
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+            />
+            <select
+              value={newPlayerGrade}
+              onChange={(e) => setNewPlayerGrade(e.target.value)}
+            >
+              <option value="S">S</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+            </select>
+            <select
+              value={newPlayerGender}
+              onChange={(e) => setNewPlayerGender(e.target.value)}
+            >
+              <option value="M">M</option>
+              <option value="F">F</option>
+            </select>
+            <button onClick={handleAddPlayer}>➕ Add Player</button>
+          </div>
         </div>
       )}
 
