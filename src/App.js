@@ -132,7 +132,7 @@ const generateOneMatch = () => {
           <span
             style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}
           >
-            v0.1.00
+            v0.2.00
           </span>
         </h1>
         <br />
@@ -227,7 +227,7 @@ const generateOneMatch = () => {
           <option value="M">M</option>
           <option value="F">F</option>
         </select>
-        <button onClick={handleAddPlayer}>➕ Add Player</button>
+        <button onClick={handleAddPlayer}>➕ Player</button>
       </div>
     </div>
   </div>

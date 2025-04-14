@@ -33,7 +33,13 @@ body {
   display: flex;
   gap: 20px;
   justify-content: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  min-width: max-content;
+}
+
+.button-container {
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
 button {
@@ -162,45 +168,6 @@ button:hover {
   background-color: transparent;
 }
 
-@media (max-width: 600px) {
-  .menu {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .menu button {
-    min-width: 40px;
-    width: auto;
-  }
-
-  .upload-box {
-    margin-top: 20px;
-  }
-
-  .actions {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  }
-}
-
-input,
-select,
-textarea {
-  background-color: #1e1e1e;
-  color: #f0f0f0;
-  border: 1px solid #333;
-  padding: 6px 10px;
-  border-radius: 4px;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #555;
-}
-
 /* ✅ Party Keras & Party Mix horizontal fix */
 .party-keras-checkboxes-row {
   display: flex;
@@ -221,4 +188,101 @@ textarea:focus {
   min-width: 0;
   gap: 6px;
   font-size: 14px;
+}
+
+/* Form and input styling */
+input,
+select,
+textarea {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #555;
+}
+
+/* 🔁 Responsive Tweaks */
+@media (max-width: 768px) {
+  .manual-match-section,
+  .player-addition {
+    flex: 1 1 100%;
+    margin-bottom: 20px;
+  }
+
+  .manual-match-section h3,
+  .player-addition h3 {
+    text-align: center;
+  }
+
+  .manual-match-section input,
+  .player-addition input,
+  .manual-match-section select,
+  .player-addition select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .manual-match-section button,
+  .player-addition button {
+    width: 100%;
+  }
+
+  .match-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .match-card {
+    padding: 12px;
+  }
+
+  .match-header {
+    font-size: 0.9rem;
+  }
+
+  .app {
+    padding: 10px;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+  }
+
+  .menu {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .upload-box {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .match-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .menu button {
+    font-size: 16px;
+    height: 36px;
+    padding: 4px 6px;
+  }
+
+  .header h1 {
+    font-size: 1.1rem;
+  }
 }
