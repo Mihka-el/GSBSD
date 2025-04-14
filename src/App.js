@@ -44,44 +44,49 @@ function App() {
     );
   };
 
-  const generateOneMatch = () => {
-    let currentPlayers = [...players];
-    let match = generateMatch(currentPlayers, generatedMatches, {
-      allowSpecialPatterns,
-      allowMixedGender,
-    });
+const generateOneMatch = () => {
+  let currentPlayers = [...players];
 
-    if (!match || match.length !== 4) {
-      const allInactive = currentPlayers.every(
-        (p) => p.Active === false || p.Active === "FALSE"
-      );
-      if (allInactive) {
-        currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
-        match = generateMatch(currentPlayers, generatedMatches, {
-          allowSpecialPatterns,
-          allowMixedGender,
-        });
-      }
+  let match = generateMatch(currentPlayers, generatedMatches, {
+    allowSpecialPatterns,
+    allowMixedGender,
+  });
 
-      if (!match || match.length !== 4) {
-        alert("No valid match can be generated.");
-        return;
-      }
+  if (!match || match.length !== 4) {
+    const activeCount = currentPlayers.filter(
+      (p) => p.Active === true || p.Active === "TRUE"
+    ).length;
+
+    if (activeCount < 4) {
+      console.log("🔄 Not enough active players. Resetting all to active.");
+      currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
+
+      match = generateMatch(currentPlayers, generatedMatches, {
+        allowSpecialPatterns,
+        allowMixedGender,
+      });
     }
 
-    const updatedPlayers = currentPlayers.map((p) =>
-      match.find((m) => m.Name === p.Name)
-        ? {
-            ...p,
-            Active: false,
-            "Games Played": parseInt(p["Games Played"]) + 1,
-          }
-        : p
-    );
+    if (!match || match.length !== 4) {
+      alert("❌ No valid match can be generated.");
+      return;
+    }
+  }
 
-    setPlayers(updatedPlayers);
-    setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
-  };
+  const updatedPlayers = currentPlayers.map((p) =>
+    match.find((m) => m.Name === p.Name)
+      ? {
+          ...p,
+          Active: false,
+          "Games Played": parseInt(p["Games Played"]) + 1,
+        }
+      : p
+  );
+
+  setPlayers(updatedPlayers);
+  setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
+};
+
 
   const resetPlayers = () => {
     const reset = players.map((p) => ({
@@ -232,27 +237,31 @@ function App() {
 
 
 
+{showAdvancedOptions && (
+  <div className="advanced-options" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <input
+        type="checkbox"
+        checked={allowSpecialPatterns}
+        onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
+        style={{ marginRight: "10px" }} // Space between checkbox and label
+      />
+      <span>Party Keras</span>
+    </div>
+    
+    <div style={{ display: "flex", alignItems: "center" }}>
+      <input
+        type="checkbox"
+        checked={allowMixedGender}
+        onChange={(e) => setAllowMixedGender(e.target.checked)}
+        style={{ marginRight: "10px" }} // Space between checkbox and label
+      />
+      <span>Party Mix</span>
+    </div>
+  </div>
+)}
 
-      {showAdvancedOptions && (
-        <div className="advanced-options">
-          <label>
-            <input
-              type="checkbox"
-              checked={allowSpecialPatterns}
-              onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
-            />
-            Party Keras
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={allowMixedGender}
-              onChange={(e) => setAllowMixedGender(e.target.checked)}
-            />
-            Party Mix
-          </label>
-        </div>
-      )}
+
 
       <div className="match-grid">
         {generatedMatches.map((match, index) => (

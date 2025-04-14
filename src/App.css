@@ -1,17 +1,15 @@
-/* 🌒 App.css – Responsive Dark Theme */
+/* 🌒 App.css – includes scrollable player list fix */
 body {
   margin: 0;
   background-color: #121212;
   color: #f0f0f0;
   font-family: "Segoe UI", sans-serif;
-  overflow-x: hidden;
 }
 
 .app {
   padding: 20px;
   max-width: 1000px;
   margin: auto;
-  box-sizing: border-box;
 }
 
 .header {
@@ -35,7 +33,7 @@ body {
   display: flex;
   gap: 20px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 button {
@@ -65,19 +63,7 @@ button:hover {
   text-align: center;
 }
 
-.advanced-options,
-.player-addition {
-  margin: 1rem auto;
-  padding: 10px;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 300px;
-}
-
-.manual-match-section {
+.advanced-options {
   margin: 1rem auto;
   padding: 10px;
   background-color: #1e1e1e;
@@ -176,59 +162,15 @@ button:hover {
   background-color: transparent;
 }
 
-input,
-select,
-textarea {
-  background-color: #1e1e1e;
-  color: #f0f0f0;
-  border: 1px solid #333;
-  padding: 6px 10px;
-  border-radius: 4px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #555;
-}
-
-/* Ensures consistency for specific side-by-side inputs */
-.input-fixed {
-  width: 250px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  background-color: #1e1e1e;
-  color: #f0f0f0;
-  border: 1px solid #333;
-  box-sizing: border-box;
-}
-
-/* Mobile / Small screen tweaks */
 @media (max-width: 600px) {
-  .app {
-    padding: 10px;
-  }
-
   .menu {
     flex-direction: row;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
   }
 
   .menu button {
-    flex: 1 0 auto;
     min-width: 40px;
-    font-size: 16px;
-    height: 36px;
-    margin-bottom: 5px;
-  }
-
-  .match-grid {
-    max-height: 300px;
+    width: auto;
   }
 
   .upload-box {
@@ -240,45 +182,43 @@ textarea:focus {
     gap: 15px;
     align-items: center;
   }
-
-  body {
-    font-size: 15px;
-  }
-
-  button {
-    font-size: 16px;
-    height: 36px;
-  }
-
-  .player-addition input,
-  .player-addition select,
-  .player-addition button,
-  .advanced-options input,
-  .advanced-options select,
-  .advanced-options button {
-    width: 100%;
-  }
 }
 
-.red-box {
-  width: 200px;
-  height: 200px;
-  background-color: red;
-}
-.manual-match-section input,
-.manual-match-section select,
-.manual-match-section button {
-  width: 100%; /* Ensure all elements take the full width */
-  box-sizing: border-box;
-}
-
-.manual-match-section input {
-  margin-bottom: 10px; /* Adjust space between input and button */
-}
-
-.manual-match-section button {
-  margin-top: 10px; /* Optional: Adjust top margin for the button */
-  padding: 10px 0;  /* Optional: Adjust padding inside the button */
-  color: white;
+input,
+select,
+textarea {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border: 1px solid #333;
+  padding: 6px 10px;
   border-radius: 4px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #555;
+}
+
+/* ✅ Party Keras & Party Mix horizontal fix */
+.party-keras-checkboxes-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.party-keras-checkboxes-row label,
+.party-keras-checkboxes-row > div {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+  gap: 6px;
+  font-size: 14px;
 }

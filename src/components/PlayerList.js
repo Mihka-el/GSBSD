@@ -31,16 +31,6 @@ const PlayerList = ({ players, setPlayers, setGeneratedMatches }) => {
   return (
     <div className="player-list">
       <h2>👥 Player List</h2>
-
-      <div className="manual-section">
-        <h4>➕ Manually Add Game</h4>
-        <ManualGameAdd
-          players={players}
-          setPlayers={setPlayers}
-          setGeneratedMatches={setGeneratedMatches}
-        />
-      </div>
-
       <div className="player-cards-wrapper">
         {grades.map((grade) => {
           const group = players.filter((p) => p.Grade === grade);
