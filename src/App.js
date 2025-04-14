@@ -3,6 +3,7 @@ import Papa from "papaparse";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import { generateMatch } from "./utils/generateMatch";
+import CSVUploader from "./components/CSVUploader"; // Make sure this path matches your file structure
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -36,24 +37,6 @@ function App() {
         [{player.Grade}] {player.Name}
       </span>
     );
-  };
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const cleaned = results.data.map((p, i) => ({
-          Name: p.Name?.trim() || `Player ${i + 1}`,
-          Grade: p.Grade?.trim().toUpperCase() || "C",
-          Gender: p.Gender?.trim().toUpperCase() || "M",
-          "Games Played": parseInt(p["Games Played"] || "0", 10),
-          Active: p.Active === "TRUE" || p.Active === true,
-        }));
-        setPlayers(cleaned);
-      },
-    });
   };
 
   const generateOneMatch = () => {
@@ -122,28 +105,27 @@ function App() {
             v0.1.00
           </span>
         </h1>
-		<br />
-
-		<div className="button-container">
-       <div className="menu">
-  <button
-    className="upload-button"
-    onClick={() => setShowUpload(!showUpload)}
-  >
-    {showUpload ? "Hide Upload" : "📂"}
-  </button>
-  <button onClick={generateOneMatch}>➕ Match</button>
-  <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>⚙️</button>
-  <button onClick={() => setDeleteMode(!deleteMode)}>
-    {deleteMode ? "🔒" : "🗑️"}
-  </button>
-</div>
-</div>
+        <br />
+        <div className="button-container">
+          <div className="menu">
+            <button
+              className="upload-button"
+              onClick={() => setShowUpload(!showUpload)}
+            >
+              {showUpload ? "Hide Upload" : "📂"}
+            </button>
+            <button onClick={generateOneMatch}>➕ Match</button>
+            <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>⚙️</button>
+            <button onClick={() => setDeleteMode(!deleteMode)}>
+              {deleteMode ? "🔒" : "🗑️"}
+            </button>
+          </div>
+        </div>
       </header>
 
       {showUpload && (
         <div className="upload-box">
-          <input type="file" accept=".csv" onChange={handleFileUpload} />
+          <CSVUploader onDataLoaded={setPlayers} players={players} />
         </div>
       )}
 
