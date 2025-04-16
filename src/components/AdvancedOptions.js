@@ -35,7 +35,7 @@ const AdvancedOptions = ({
           checked={partyAB}
           onChange={(e) => setPartyAB(e.target.checked)}
         />
-        <span>PartyAB</span>
+        <span>Party AB</span>
       </div>
     </div>
   );
