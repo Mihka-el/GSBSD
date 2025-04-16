@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
 import "./App.css";
+
 import PlayerList from "./components/PlayerList";
-import { generateMatch } from "./utils/generateMatch";
 import CSVUploader from "./components/CSVUploader";
-import ManualGameAdd from "./components/ManualGameAdd"; // ✅ import manual add
+import ManualTools from "./components/ManualTools";
+import MatchCard from "./components/MatchCard";
+import AdvancedOptions from "./components/AdvancedOptions";
+
+import { generateMatch } from "./utils/generateMatch";
+import { getGradeColor, formatPlayer } from "./utils/playerUtils";
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -13,80 +18,57 @@ function App() {
   const [showUpload, setShowUpload] = useState(false);
   const [showManualAdd, setShowManualAdd] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
-  const [allowMixedGender, setAllowMixedGender] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
+
+  const [partyKeras, setPartyKeras] = useState(false);
+  const [partyMix, setPartyMix] = useState(false);
+
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerGrade, setNewPlayerGrade] = useState("S");
-  const [newPlayerGender, setNewPlayerGender] = useState("M"); // Updated gender field
-  const DEMO_MODE = false;
+  const [newPlayerGender, setNewPlayerGender] = useState("M");
 
-  const getGradeColor = (grade) => {
-    switch (grade) {
-      case "S":
-        return "gold";
-      case "A":
-        return "red";
-      case "B":
-        return "blue";
-      case "C":
-        return "green";
-      default:
-        return "white";
-    }
-  };
-
-  const formatPlayer = (player) => {
-    return (
-      <span style={{ color: getGradeColor(player.Grade), fontWeight: "bold" }}>
-        [{player.Grade}] {player.Name}
-      </span>
-    );
-  };
-
-const generateOneMatch = () => {
-  let currentPlayers = [...players];
-
-  let match = generateMatch(currentPlayers, generatedMatches, {
-    allowSpecialPatterns,
-    allowMixedGender,
-  });
-
-  if (!match || match.length !== 4) {
-    const activeCount = currentPlayers.filter(
-      (p) => p.Active === true || p.Active === "TRUE"
-    ).length;
-
-    if (activeCount < 4) {
-      console.log("🔄 Not enough active players. Resetting all to active.");
-      currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
-
-      match = generateMatch(currentPlayers, generatedMatches, {
-        allowSpecialPatterns,
-        allowMixedGender,
-      });
-    }
+  const generateOneMatch = () => {
+    let currentPlayers = [...players];
+    let match = generateMatch(currentPlayers, generatedMatches, {
+      allowSpecialPatterns: partyKeras,
+      allowMixedGender: partyMix,
+    });
 
     if (!match || match.length !== 4) {
-      alert("❌ No valid match can be generated.");
-      return;
+      const activeBeforeReset = currentPlayers.filter(
+        (p) => p.Active === true || p.Active === "TRUE"
+      );
+
+      if (activeBeforeReset.length < 4) {
+        console.log("🔄 Not enough active players. Resetting all to active.");
+        currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
+
+        const sortedPlayers = [
+          ...activeBeforeReset,
+          ...currentPlayers.filter((p) => !activeBeforeReset.includes(p)),
+        ];
+
+        match = generateMatch(sortedPlayers, generatedMatches, {
+          allowSpecialPatterns: partyKeras,
+          allowMixedGender: partyMix,
+        });
+      }
+
+      if (!match || match.length !== 4) {
+        alert("❌ No valid match can be generated.");
+        return;
+      }
     }
-  }
 
-  const updatedPlayers = currentPlayers.map((p) =>
-    match.find((m) => m.Name === p.Name)
-      ? {
-          ...p,
-          Active: false,
-          "Games Played": parseInt(p["Games Played"]) + 1,
-        }
-      : p
-  );
+    const updatedPlayers = currentPlayers.map((p) =>
+      match.find((m) => m.Name === p.Name)
+        ? { ...p, Active: false, "Games Played": parseInt(p["Games Played"]) + 1 }
+        : p
+    );
 
-  setPlayers(updatedPlayers);
-  setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
-};
-
+    setPlayers(updatedPlayers);
+    setGeneratedMatches([...generatedMatches, match.map((p) => p.Name)]);
+  };
 
   const resetPlayers = () => {
     const reset = players.map((p) => ({
@@ -98,11 +80,32 @@ const generateOneMatch = () => {
     setGeneratedMatches([]);
   };
 
-  const handleDeleteMatch = (index) => {
-    const updated = [...generatedMatches];
-    updated.splice(index, 1);
-    setGeneratedMatches(updated);
-  };
+const handleDeleteMatch = (index) => {
+  const matchToDelete = generatedMatches[index];
+  const updatedPlayers = [...players];
+
+  // Decrement "Games Played" and reset "Active" status for players in the deleted match
+  matchToDelete.forEach(playerName => {
+    const playerIndex = updatedPlayers.findIndex(p => p.Name === playerName);
+    if (playerIndex !== -1) {
+      updatedPlayers[playerIndex] = {
+        ...updatedPlayers[playerIndex],
+        "Games Played": updatedPlayers[playerIndex]["Games Played"] - 1,
+        Active: true, // Resetting back to active since the match was deleted
+      };
+    }
+  });
+
+  // Remove the match from the generated matches
+  const updatedMatches = [...generatedMatches];
+  updatedMatches.splice(index, 1);
+
+  // Update the state with the new players and matches
+  setPlayers(updatedPlayers);
+  setGeneratedMatches(updatedMatches);
+};
+
+
 
   const handleAddPlayer = () => {
     if (newPlayerName.trim() === "") {
@@ -113,15 +116,15 @@ const generateOneMatch = () => {
     const newPlayer = {
       Name: newPlayerName.trim(),
       Grade: newPlayerGrade,
-      Gender: newPlayerGender, // Add gender here
+      Gender: newPlayerGender,
       Active: true,
       "Games Played": 0,
     };
 
     setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
     setNewPlayerName("");
-    setNewPlayerGrade("S"); // Reset grade to S
-    setNewPlayerGender("M"); // Reset gender to M (Male)
+    setNewPlayerGrade("S");
+    setNewPlayerGender("M");
   };
 
   return (
@@ -129,19 +132,14 @@ const generateOneMatch = () => {
       <header className="header">
         <h1>
           GSBSD Generator
-          <span
-            style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}
-          >
+          <span style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}>
             v0.2.00
           </span>
         </h1>
         <br />
         <div className="button-container">
           <div className="menu">
-            <button
-              className="upload-button"
-              onClick={() => setShowUpload(!showUpload)}
-            >
+            <button onClick={() => setShowUpload(!showUpload)}>
               {showUpload ? "Hide Upload" : "📂"}
             </button>
             <button onClick={generateOneMatch}>➕ Match</button>
@@ -164,128 +162,39 @@ const generateOneMatch = () => {
         </div>
       )}
 
-
-{showManualAdd && (
-  <div style={{ padding: "10px" }}>
-    <div
-      style={{
-        display: "flex",
-        gap: "20px",
-        alignItems: "stretch",
-      }}
-    >
-      {/* Manual Match Box */}
-      <div
-        className="manual-match-section"
-        style={{
-          flex: 1,
-          padding: "10px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          boxSizing: "border-box",
-        }}
-      >
-        <h3>Add New Match</h3>
-        <ManualGameAdd
+      {showManualAdd && (
+        <ManualTools
           players={players}
           setPlayers={setPlayers}
           setGeneratedMatches={setGeneratedMatches}
+          newPlayerName={newPlayerName}
+          setNewPlayerName={setNewPlayerName}
+          newPlayerGrade={newPlayerGrade}
+          setNewPlayerGrade={setNewPlayerGrade}
+          newPlayerGender={newPlayerGender}
+          setNewPlayerGender={setNewPlayerGender}
+          handleAddPlayer={handleAddPlayer}
         />
-      </div>
+      )}
 
-      {/* Add New Player Box */}
-      <div
-        className="player-addition"
-        style={{
-          flex: 1,
-          padding: "10px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          boxSizing: "border-box",
-        }}
-      >
-        <h3>Add New Player</h3>
-        <input
-          type="text"
-          placeholder="Player Name"
-          value={newPlayerName}
-          onChange={(e) => setNewPlayerName(e.target.value)}
+      {showAdvancedOptions && (
+        <AdvancedOptions
+          partyKeras={partyKeras}
+          setPartyKeras={setPartyKeras}
+          partyMix={partyMix}
+          setPartyMix={setPartyMix}
         />
-        <select
-          value={newPlayerGrade}
-          onChange={(e) => setNewPlayerGrade(e.target.value)}
-        >
-          <option value="S">S</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-        </select>
-        <select
-          value={newPlayerGender}
-          onChange={(e) => setNewPlayerGender(e.target.value)}
-        >
-          <option value="M">M</option>
-          <option value="F">F</option>
-        </select>
-        <button onClick={handleAddPlayer}>➕ Player</button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
-
-{showAdvancedOptions && (
-  <div className="advanced-options" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <input
-        type="checkbox"
-        checked={allowSpecialPatterns}
-        onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
-        style={{ marginRight: "10px" }} // Space between checkbox and label
-      />
-      <span>Party Keras</span>
-    </div>
-    
-    <div style={{ display: "flex", alignItems: "center" }}>
-      <input
-        type="checkbox"
-        checked={allowMixedGender}
-        onChange={(e) => setAllowMixedGender(e.target.checked)}
-        style={{ marginRight: "10px" }} // Space between checkbox and label
-      />
-      <span>Party Mix</span>
-    </div>
-  </div>
-)}
-
-
+      )}
 
       <div className="match-grid">
         {generatedMatches.map((match, index) => (
-          <div className="match-card" key={index}>
-            <div className="match-header">
-              Match {index + 1}
-              {deleteMode && (
-                <span
-                  className="delete-button"
-                  onClick={() => handleDeleteMatch(index)}
-                >
-                  ❌
-                </span>
-              )}
-            </div>
-            <div className="teams">
-              <div>
-                <strong>Team 1:</strong> {match.slice(0, 2).join(", ")}
-              </div>
-              <div>
-                <strong>Team 2:</strong> {match.slice(2, 4).join(", ")}
-              </div>
-            </div>
-          </div>
+          <MatchCard
+            key={index}
+            match={match}
+            index={index}
+            deleteMode={deleteMode}
+            onDelete={handleDeleteMatch}
+          />
         ))}
       </div>
 
