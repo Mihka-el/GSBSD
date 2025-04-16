@@ -1,12 +1,12 @@
 import React from "react";
 
-const MatchCard = ({ match, index, deleteMode, onDelete }) => {
+const MatchCard = ({ match, index, deleteMode, handleDeleteMatch }) => {
   return (
-    <div className="match-card">
+    <div className="match-card" key={index}>
       <div className="match-header">
         Match {index + 1}
         {deleteMode && (
-          <span className="delete-button" onClick={() => onDelete(index)}>
+          <span className="delete-button" onClick={() => handleDeleteMatch(index)}>
             ❌
           </span>
         )}

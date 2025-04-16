@@ -1,6 +1,4 @@
-// 🎮 PlayerList.js – Compact card layout with scroll, styled as "✅ Edith F - 0"
-import React from "react";
-import ManualGameAdd from "./ManualGameAdd";
+import React, { useState } from "react";
 
 const getGradeColor = (grade) => {
   switch (grade) {
@@ -26,6 +24,24 @@ const formatPlayer = (player) => {
 };
 
 const PlayerList = ({ players, setPlayers, setGeneratedMatches }) => {
+  const [restingPlayers, setRestingPlayers] = useState([]);
+  const [isRestButtonDisabled, setIsRestButtonDisabled] = useState(true); // Flag to disable Rest button
+
+  const handleRestToggle = (player) => {
+    // Toggle resting status
+    const updatedPlayers = players.map((p) =>
+      p.Name === player.Name ? { ...p, Active: !p.Active } : p
+    );
+    setPlayers(updatedPlayers);
+
+    // Add/remove from restingPlayers list
+    if (player.Active) {
+      setRestingPlayers([...restingPlayers, player.Name]);
+    } else {
+      setRestingPlayers(restingPlayers.filter((name) => name !== player.Name));
+    }
+  };
+
   const grades = ["S", "A", "B", "C"];
 
   return (
@@ -43,6 +59,15 @@ const PlayerList = ({ players, setPlayers, setGeneratedMatches }) => {
                   <li key={i}>
                     {player.Active ? "✅" : "❌"} {player.Name} {player.Gender}{" "}
                     - {player["Games Played"]}
+                    {/* Button will be completely hidden if isRestButtonDisabled is true */}
+                    {!isRestButtonDisabled && (
+                      <button
+                        onClick={() => handleRestToggle(player)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        {player.Active ? "Rest" : "Unrest"}
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>

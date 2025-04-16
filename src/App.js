@@ -1,37 +1,34 @@
 import React, { useState } from "react";
-import Papa from "papaparse";
 import "./App.css";
-
 import PlayerList from "./components/PlayerList";
-import CSVUploader from "./components/CSVUploader";
-import ManualTools from "./components/ManualTools";
-import MatchCard from "./components/MatchCard";
+import CSVImporterExporter from "./components/CSVImporterExporter";
+import PlayerEntryAndMatchTools from "./components/PlayerEntryAndMatchTools";
 import AdvancedOptions from "./components/AdvancedOptions";
-
 import { generateMatch } from "./utils/generateMatch";
-import { getGradeColor, formatPlayer } from "./utils/playerUtils";
 
 function App() {
   const [players, setPlayers] = useState([]);
   const [generatedMatches, setGeneratedMatches] = useState([]);
-  const [showPlayerList, setShowPlayerList] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showManualAdd, setShowManualAdd] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showPlayerList, setShowPlayerList] = useState(false);
+  const [allowSpecialPatterns, setAllowSpecialPatterns] = useState(false);
+  const [allowMixedGender, setAllowMixedGender] = useState(false);
+  const [partyAB, setPartyAB] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
-
-  const [partyKeras, setPartyKeras] = useState(false);
-  const [partyMix, setPartyMix] = useState(false);
 
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerGrade, setNewPlayerGrade] = useState("S");
   const [newPlayerGender, setNewPlayerGender] = useState("M");
 
   const generateOneMatch = () => {
-    let currentPlayers = [...players];
+    let currentPlayers = players.filter((p) => p.Resting !== true);
+
     let match = generateMatch(currentPlayers, generatedMatches, {
-      allowSpecialPatterns: partyKeras,
-      allowMixedGender: partyMix,
+      allowSpecialPatterns,
+      allowMixedGender,
+      partyAB,
     });
 
     if (!match || match.length !== 4) {
@@ -41,7 +38,11 @@ function App() {
 
       if (activeBeforeReset.length < 4) {
         console.log("🔄 Not enough active players. Resetting all to active.");
-        currentPlayers = currentPlayers.map((p) => ({ ...p, Active: true }));
+        currentPlayers = currentPlayers.map((p) => ({
+          ...p,
+          Active: true,
+          Resting: false,
+        }));
 
         const sortedPlayers = [
           ...activeBeforeReset,
@@ -49,8 +50,9 @@ function App() {
         ];
 
         match = generateMatch(sortedPlayers, generatedMatches, {
-          allowSpecialPatterns: partyKeras,
-          allowMixedGender: partyMix,
+          allowSpecialPatterns,
+          allowMixedGender,
+          partyAB,
         });
       }
 
@@ -60,7 +62,7 @@ function App() {
       }
     }
 
-    const updatedPlayers = currentPlayers.map((p) =>
+    const updatedPlayers = players.map((p) =>
       match.find((m) => m.Name === p.Name)
         ? { ...p, Active: false, "Games Played": parseInt(p["Games Played"]) + 1 }
         : p
@@ -74,38 +76,32 @@ function App() {
     const reset = players.map((p) => ({
       ...p,
       Active: true,
+      Resting: false,
       "Games Played": 0,
     }));
     setPlayers(reset);
     setGeneratedMatches([]);
   };
 
-const handleDeleteMatch = (index) => {
-  const matchToDelete = generatedMatches[index];
-  const updatedPlayers = [...players];
+  const handleDeleteMatch = (index) => {
+    const matchToDelete = generatedMatches[index];
+    const updatedMatches = [...generatedMatches];
+    updatedMatches.splice(index, 1);
+    setGeneratedMatches(updatedMatches);
 
-  // Decrement "Games Played" and reset "Active" status for players in the deleted match
-  matchToDelete.forEach(playerName => {
-    const playerIndex = updatedPlayers.findIndex(p => p.Name === playerName);
-    if (playerIndex !== -1) {
-      updatedPlayers[playerIndex] = {
-        ...updatedPlayers[playerIndex],
-        "Games Played": updatedPlayers[playerIndex]["Games Played"] - 1,
-        Active: true, // Resetting back to active since the match was deleted
-      };
-    }
-  });
+    const updatedPlayers = players.map((player) => {
+      if (matchToDelete.includes(player.Name)) {
+        return {
+          ...player,
+          Active: true,
+          "Games Played": Math.max(0, player["Games Played"] - 1),
+        };
+      }
+      return player;
+    });
 
-  // Remove the match from the generated matches
-  const updatedMatches = [...generatedMatches];
-  updatedMatches.splice(index, 1);
-
-  // Update the state with the new players and matches
-  setPlayers(updatedPlayers);
-  setGeneratedMatches(updatedMatches);
-};
-
-
+    setPlayers(updatedPlayers);
+  };
 
   const handleAddPlayer = () => {
     if (newPlayerName.trim() === "") {
@@ -119,6 +115,7 @@ const handleDeleteMatch = (index) => {
       Gender: newPlayerGender,
       Active: true,
       "Games Played": 0,
+      Resting: false,
     };
 
     setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
@@ -131,39 +128,37 @@ const handleDeleteMatch = (index) => {
     <div className="app">
       <header className="header">
         <h1>
-          GSBSD Generator
+          GSBSD Generator{" "}
           <span style={{ fontSize: "0.3em", marginLeft: "1rem", color: "#888" }}>
-            v0.2.00
+            v0.2.01
           </span>
         </h1>
         <br />
         <div className="button-container">
-          <div className="menu">
-            <button onClick={() => setShowUpload(!showUpload)}>
-              {showUpload ? "Hide Upload" : "📂"}
-            </button>
-            <button onClick={generateOneMatch}>➕ Match</button>
-            <button onClick={() => setShowManualAdd(!showManualAdd)}>
-              {showManualAdd ? "Hide Manual" : "➕ Manual"}
-            </button>
-            <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
-              ⚙️
-            </button>
-            <button onClick={() => setDeleteMode(!deleteMode)}>
-              {deleteMode ? "🔒" : "🗑️"}
-            </button>
-          </div>
+          <button onClick={() => setShowUpload(!showUpload)}>
+            {showUpload ? "Hide Upload" : "📂"}
+          </button>
+          <button onClick={generateOneMatch}>➕ Match</button>
+          <button onClick={() => setShowManualAdd(!showManualAdd)}>
+            {showManualAdd ? "Hide Manual" : "➕ Manual"}
+          </button>
+          <button onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+            ⚙️
+          </button>
+          <button onClick={() => setDeleteMode(!deleteMode)}>
+            {deleteMode ? "🔒" : "🗑️"}
+          </button>
         </div>
       </header>
 
       {showUpload && (
         <div className="upload-box">
-          <CSVUploader onDataLoaded={setPlayers} players={players} />
+          <CSVImporterExporter onDataLoaded={setPlayers} players={players} />
         </div>
       )}
 
       {showManualAdd && (
-        <ManualTools
+        <PlayerEntryAndMatchTools
           players={players}
           setPlayers={setPlayers}
           setGeneratedMatches={setGeneratedMatches}
@@ -179,22 +174,35 @@ const handleDeleteMatch = (index) => {
 
       {showAdvancedOptions && (
         <AdvancedOptions
-          partyKeras={partyKeras}
-          setPartyKeras={setPartyKeras}
-          partyMix={partyMix}
-          setPartyMix={setPartyMix}
+          allowSpecialPatterns={allowSpecialPatterns}
+          setAllowSpecialPatterns={setAllowSpecialPatterns}
+          allowMixedGender={allowMixedGender}
+          setAllowMixedGender={setAllowMixedGender}
+          partyAB={partyAB}
+          setPartyAB={setPartyAB}
         />
       )}
 
       <div className="match-grid">
         {generatedMatches.map((match, index) => (
-          <MatchCard
-            key={index}
-            match={match}
-            index={index}
-            deleteMode={deleteMode}
-            onDelete={handleDeleteMatch}
-          />
+          <div className="match-card" key={index}>
+            <div className="match-header">
+              Match {index + 1}
+              {deleteMode && (
+                <span className="delete-button" onClick={() => handleDeleteMatch(index)}>
+                  ❌
+                </span>
+              )}
+            </div>
+            <div className="teams">
+              <div>
+                <strong>Team 1:</strong> {match.slice(0, 2).join(", ")}
+              </div>
+              <div>
+                <strong>Team 2:</strong> {match.slice(2, 4).join(", ")}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
 

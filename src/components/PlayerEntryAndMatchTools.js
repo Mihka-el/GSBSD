@@ -1,4 +1,4 @@
-// components/ManualTools.js
+// components/PlayerEntryAndMatchTools.js
 import React from "react";
 import ManualGameAdd from "./ManualGameAdd";
 
