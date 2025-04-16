@@ -17,7 +17,7 @@ const AdvancedOptions = ({
           checked={allowSpecialPatterns}
           onChange={(e) => setAllowSpecialPatterns(e.target.checked)}
         />
-        <span>Allow Special Patterns</span>
+        <span>Allow S Match Only</span>
       </div>
 
       <div>
@@ -35,7 +35,7 @@ const AdvancedOptions = ({
           checked={partyAB}
           onChange={(e) => setPartyAB(e.target.checked)}
         />
-        <span>Party A B vs A B</span>
+        <span>PartyAB</span>
       </div>
     </div>
   );
