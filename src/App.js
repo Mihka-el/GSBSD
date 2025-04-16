@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import PlayerList from "./components/PlayerList";
 import CSVImporterExporter from "./components/CSVImporterExporter";
@@ -7,8 +7,14 @@ import AdvancedOptions from "./components/AdvancedOptions";
 import { generateMatch } from "./utils/generateMatch";
 
 function App() {
-  const [players, setPlayers] = useState([]);
-  const [generatedMatches, setGeneratedMatches] = useState([]);
+  const [players, setPlayers] = useState(() => {
+    const savedPlayers = localStorage.getItem("players");
+    return savedPlayers ? JSON.parse(savedPlayers) : [];
+  });
+  const [generatedMatches, setGeneratedMatches] = useState(() => {
+    const savedMatches = localStorage.getItem("generatedMatches");
+    return savedMatches ? JSON.parse(savedMatches) : [];
+  });
   const [showUpload, setShowUpload] = useState(false);
   const [showManualAdd, setShowManualAdd] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -21,6 +27,11 @@ function App() {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerGrade, setNewPlayerGrade] = useState("S");
   const [newPlayerGender, setNewPlayerGender] = useState("M");
+
+  useEffect(() => {
+    localStorage.setItem("players", JSON.stringify(players));
+    localStorage.setItem("generatedMatches", JSON.stringify(generatedMatches));
+  }, [players, generatedMatches]);
 
   const generateOneMatch = () => {
     let currentPlayers = players.filter((p) => p.Resting !== true);
@@ -81,6 +92,13 @@ function App() {
     }));
     setPlayers(reset);
     setGeneratedMatches([]);
+
+    // Clear localStorage for players and matches
+    localStorage.removeItem("players");
+    localStorage.removeItem("generatedMatches");
+
+    // Log success message to the console
+    console.log("✅ Local Storage cleared: players and generated matches have been reset.");
   };
 
   const handleDeleteMatch = (index) => {
